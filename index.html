@@ -53,7 +53,7 @@ body::before{
   gap:14px;
 }
 
-/* HEADER */
+/* HEADER - ENTRADA CINEMÁTICA */
 .top{
   display:flex;
   flex-direction:column;
@@ -111,53 +111,38 @@ body::before{
   display:flex;
   align-items:center;
   justify-content:center;
-  margin-top:10px;
-  margin-bottom:10px;
+  margin-top:2px;
 }
 
 .pizza-container{
   position:relative;
-  width: 85vw;          
-  max-width: 320px;     
-  aspect-ratio: 1 / 1;  
+  width:320px;
+  height:320px;
 }
 
 .pizza-svg{
-  width: 100%;
-  height: 100%;
+  width:320px;
+  height:320px;
+  background: transparent;
   display: block;
-  object-fit: contain;  
 }
 
-.pixel-avatar {
-  image-rendering: -moz-crisp-edges;
-  image-rendering: -o-crisp-edges;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-  image-rendering: pixelated;
-  -ms-interpolation-mode: nearest-neighbor;
-}
-
-/* Corregido: Quitamos la animación de ensamble que causaba el efecto flor en móviles */
 .slice {
   transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
   transform-origin: 100px 100px;
+  opacity: 0;
 }
 
 .slice path.bg{
-  fill:#111;
-  stroke:#080808;
-  stroke-width:3;
   transition: fill 0.15s, stroke 0.15s;
 }
 
 .slice path.icon-path{
-  fill:#2a2a2a;
   transition: fill 0.15s;
   pointer-events:none;
 }
 
-/* centro */
+/* center circle */
 .center-circle{
   fill:#0d0d0d;
   stroke:#1a1a1a;
@@ -176,17 +161,7 @@ body::before{
   }
 }
 
-/* Ajustes para móviles */
-@media (max-width: 768px) {
-  .slice path.icon-path {
-    fill: #666; 
-  }
-  .pizza-container {
-    max-width: 280px; 
-  }
-}
-
-/* LINKS */
+/* LINKS CON REVELADO EN CASCADA */
 .links{
   width:100%;
   border-top:1px solid #1a1a1a;
@@ -216,9 +191,9 @@ body::before{
   }
 }
 
-.link:nth-child(1) { animation-delay: 0.2s; }
-.link:nth-child(2) { animation-delay: 0.35s; }
-.link:nth-child(3) { animation-delay: 0.5s; }
+.link:nth-child(1) { animation-delay: 1.2s; }
+.link:nth-child(2) { animation-delay: 1.35s; }
+.link:nth-child(3) { animation-delay: 1.5s; }
 
 .link::after {
   content: '';
@@ -262,7 +237,7 @@ body::before{
   margin-top:6px;
   opacity: 0;
   animation: subtitleReveal 1s ease forwards;
-  animation-delay: 0.7s;
+  animation-delay: 1.7s;
 }
 .sp-label{
   font-size:13px;
@@ -296,6 +271,17 @@ body::before{
   opacity:1;
   transform:scale(1.08);
   filter:grayscale(0) brightness(1.1);
+}
+
+@keyframes sliceAssemble {
+  from {
+    opacity: 0;
+    transform: translate(var(--mx), var(--my)) scale(0.6) rotate(-20deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
 }
 </style>
 </head>
@@ -434,6 +420,14 @@ function playTickSound() {
 }
 
 const svg = document.getElementById('pizzaSVG');
+
+// Fondo negro explícito dentro del SVG para mobile
+const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+bgRect.setAttribute('width', '200');
+bgRect.setAttribute('height', '200');
+bgRect.setAttribute('fill', '#080808');
+svg.appendChild(bgRect);
+
 const cx = 100, cy = 100;
 const outerR = 95, innerR = 30;
 const n = socials.length;
@@ -468,6 +462,7 @@ socials.forEach((s, i) => {
   const [iconX, iconY] = polar(iconR, a);
   const iconSize = 16;
 
+  // SOLUCIÓN: Creamos una etiqueta nativa de enlace SVG
   const anchor = document.createElementNS('http://www.w3.org/2000/svg', 'a');
   anchor.setAttribute('href', s.url);
   anchor.setAttribute('target', '_blank');
@@ -476,9 +471,22 @@ socials.forEach((s, i) => {
   g.setAttribute('class', 'slice');
   g.style.cursor = 'pointer';
 
+  const moveDistance = 45; 
+  const mx = Math.cos(a) * moveDistance;
+  const my = Math.sin(a) * moveDistance;
+  g.style.setProperty('--mx', `${mx}px`);
+  g.style.setProperty('--my', `${my}px`);
+  
+  g.style.opacity = '0';
+  g.style.animation = `sliceAssemble 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards`;
+  g.style.animationDelay = `${0.5 + (i * 0.08)}s`;
+
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.setAttribute('class', 'bg');
   path.setAttribute('d', slicePath(i));
+  path.setAttribute('fill', '#111');
+  path.setAttribute('stroke', '#080808');
+  path.setAttribute('stroke-width', '3');
 
   const iconG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   const scale = iconSize / 24;
@@ -488,30 +496,49 @@ socials.forEach((s, i) => {
   const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   iconPath.setAttribute('d', s.iconPath);
   iconPath.setAttribute('class', 'icon-path');
+  iconPath.setAttribute('fill', '#2a2a2a');
 
   iconG.appendChild(iconPath);
   g.appendChild(path);
   g.appendChild(iconG);
 
-  g.addEventListener('mouseenter', () => {
+  anchor.addEventListener('mouseenter', () => {
     playTickSound();
     const rgb = hexToRgb(s.color);
-    path.style.fill = `rgba(${rgb},0.18)`;
-    path.style.stroke = `rgba(${rgb},0.4)`;
-    iconPath.style.fill = s.color;
+    path.setAttribute('fill', `rgba(${rgb},0.18)`);
+    path.setAttribute('stroke', `rgba(${rgb},0.4)`);
+    iconPath.setAttribute('fill', s.color);
     g.style.transform = `translate(${Math.cos(a) * 3.5}px, ${Math.sin(a) * 3.5}px)`;
     if (avatarImg) avatarImg.style.opacity = '1';
   });
   
-  g.addEventListener('mouseleave', () => {
-    const isMobile = window.innerWidth <= 768;
-    path.style.fill = '#111';
-    path.style.stroke = '#080808';
-    iconPath.style.fill = isMobile ? '#666' : '#2a2a2a';
+  anchor.addEventListener('mouseleave', () => {
+    path.setAttribute('fill', '#111');
+    path.setAttribute('stroke', '#080808');
+    iconPath.setAttribute('fill', '#2a2a2a');
     g.style.transform = 'translate(0px, 0px)';
     if (avatarImg) avatarImg.style.opacity = '0.2';
   });
 
+  anchor.addEventListener('touchstart', (e) => {
+    playTickSound();
+    const rgb = hexToRgb(s.color);
+    path.setAttribute('fill', `rgba(${rgb},0.18)`);
+    path.setAttribute('stroke', `rgba(${rgb},0.4)`);
+    iconPath.setAttribute('fill', s.color);
+    if (avatarImg) avatarImg.style.opacity = '1';
+  }, { passive: true });
+
+  anchor.addEventListener('touchend', () => {
+    setTimeout(() => {
+      path.setAttribute('fill', '#111');
+      path.setAttribute('stroke', '#080808');
+      iconPath.setAttribute('fill', '#2a2a2a');
+      if (avatarImg) avatarImg.style.opacity = '0.2';
+    }, 300);
+  }, { passive: true });
+
+  // Metemos el grupo visual dentro del enlace, y el enlace al SVG
   anchor.appendChild(g);
   svg.appendChild(anchor);
 });
@@ -541,7 +568,7 @@ avatarImg.setAttribute('y', cy - (innerR - 2));
 avatarImg.setAttribute('width', (innerR - 2) * 2);
 avatarImg.setAttribute('height', (innerR - 2) * 2);
 avatarImg.setAttribute('clip-path', 'url(#avatarClip)');
-avatarImg.setAttribute('class', 'pixel-avatar'); 
+avatarImg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
 avatarImg.style.pointerEvents = 'none';
 avatarImg.style.opacity = '0.2';
 avatarImg.style.transition = 'opacity 0.15s';
