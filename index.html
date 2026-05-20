@@ -105,24 +105,37 @@ body::before{
   }
 }
 
-/* PIZZA SOCIALS */
+/* PIZZA SOCIALS CORREGIDA */
 .pizza-wrap{
   width:100%;
   display:flex;
   align-items:center;
   justify-content:center;
-  margin-top:2px;
+  margin-top:10px;
+  margin-bottom:10px;
 }
 
 .pizza-container{
   position:relative;
-  width:320px;
-  height:320px;
+  width:85vw;          /* Relativo a la pantalla en móviles */
+  max-width:320px;     /* Límite para que en PC no rompa el diseño */
+  aspect-ratio: 1 / 1; /* FUERZA un cuadrado perfecto, adiós óvalo */
 }
 
 .pizza-svg{
-  width:320px;
-  height:320px;
+  width:100%;
+  height:100%;
+  display: block;
+}
+
+/* Renderizado Pixel-Art forzado para el avatar en móviles */
+.pixel-avatar {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -o-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+  -ms-interpolation-mode: nearest-neighbor;
 }
 
 .slice {
@@ -138,8 +151,9 @@ body::before{
   transition: fill 0.15s, stroke 0.15s;
 }
 
+/* Más visibilidad a los iconos por defecto en móviles */
 .slice path.icon-path{
-  fill:#2a2a2a;
+  fill:#444; 
   transition: fill 0.15s;
   pointer-events:none;
 }
@@ -160,6 +174,16 @@ body::before{
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* Media Query para pantallas táctiles (Mejora contraste e interacción) */
+@media (max-width: 768px) {
+  .slice path.icon-path {
+    fill: #666; /* Íconos un poco más claros en móvil para que resalten */
+  }
+  .pizza-container {
+    width: 78vw; /* Ajuste sutil de tamaño en móviles */
   }
 }
 
@@ -456,7 +480,6 @@ socials.forEach((s, i) => {
   const [iconX, iconY] = polar(iconR, a);
   const iconSize = 16;
 
-  // SOLUCIÓN: Creamos una etiqueta nativa de enlace SVG
   const anchor = document.createElementNS('http://www.w3.org/2000/svg', 'a');
   anchor.setAttribute('href', s.url);
   anchor.setAttribute('target', '_blank');
@@ -502,14 +525,14 @@ socials.forEach((s, i) => {
   });
   
   g.addEventListener('mouseleave', () => {
+    const isMobile = window.innerWidth <= 768;
     path.style.fill = '#111';
     path.style.stroke = '#080808';
-    iconPath.style.fill = '#2a2a2a';
+    iconPath.style.fill = isMobile ? '#666' : '#2a2a2a';
     g.style.transform = 'translate(0px, 0px)';
     if (avatarImg) avatarImg.style.opacity = '0.2';
   });
 
-  // Metemos el grupo visual dentro del enlace, y el enlace al SVG
   anchor.appendChild(g);
   svg.appendChild(anchor);
 });
@@ -540,6 +563,8 @@ avatarImg.setAttribute('width', (innerR - 2) * 2);
 avatarImg.setAttribute('height', (innerR - 2) * 2);
 avatarImg.setAttribute('clip-path', 'url(#avatarClip)');
 avatarImg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+// AÑADIDO: Clase CSS que fuerza el renderizado nítido de píxeles
+avatarImg.setAttribute('class', 'pixel-avatar'); 
 avatarImg.style.pointerEvents = 'none';
 avatarImg.style.opacity = '0.2';
 avatarImg.style.transition = 'opacity 0.15s';
