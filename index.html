@@ -152,7 +152,7 @@ body::before{
   }
 }
 
-/* Elementos visuales internos (Manejan la transición del Hover para no chocar con la animación) */
+/* Elementos visuales internos (Manejan la transición del Hover) */
 .slice path.bg {
   fill:#111;
   stroke:#080808;
@@ -200,10 +200,22 @@ body::before{
   }
 }
 
-/* LINKS */
+/* LINKS Y ANIMACIÓN DE LA PRIMERA LÍNEA */
 .links{
   width:100%;
   border-top:1px solid #1a1a1a;
+  /* El truco: empezamos la línea colapsada en el centro */
+  transform: scaleX(0); 
+  transform-origin: center;
+  animation: lineExpand 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  /* Sincronizado para que empiece un poco después de armarse la pizza */
+  animation-delay: 1.1s; 
+}
+
+@keyframes lineExpand {
+  to {
+    transform: scaleX(1);
+  }
 }
 
 .link{
@@ -230,9 +242,10 @@ body::before{
   }
 }
 
-.link:nth-child(1) { animation-delay: 1.2s; }
-.link:nth-child(2) { animation-delay: 1.35s; }
-.link:nth-child(3) { animation-delay: 1.5s; }
+/* Retrasos de los links ajustados en cascada para que salgan justo tras abrirse la línea */
+.link:nth-child(1) { animation-delay: 1.5s; }
+.link:nth-child(2) { animation-delay: 1.65s; }
+.link:nth-child(3) { animation-delay: 1.8s; }
 
 .link::after {
   content: '';
@@ -276,7 +289,7 @@ body::before{
   margin-top:6px;
   opacity: 0;
   animation: subtitleReveal 1s ease forwards;
-  animation-delay: 1.7s;
+  animation-delay: 2.0s; /* Sincronizado para cerrar la intro */
 }
 .sp-label{
   font-size:13px;
@@ -490,7 +503,6 @@ socials.forEach((s, i) => {
   g.setAttribute('class', 'slice');
   g.style.cursor = 'pointer';
 
-  // El grupo exterior (<g>) maneja UNICAMENTE la animación de ensamblado inicial
   const moveDistance = 45; 
   const mx = Math.cos(a) * moveDistance;
   const my = Math.sin(a) * moveDistance;
@@ -499,12 +511,10 @@ socials.forEach((s, i) => {
   g.style.animation = `sliceAssemble 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards`;
   g.style.animationDelay = `${0.5 + (i * 0.08)}s`;
 
-  // El fondo interactivo
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.setAttribute('class', 'bg');
   path.setAttribute('d', slicePath(i));
 
-  // El grupo de iconos interno (para que se mueva a la par que el path)
   const iconGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   iconGroup.setAttribute('class', 'icon-group');
 
@@ -525,7 +535,6 @@ socials.forEach((s, i) => {
   anchor.appendChild(g);
   svg.appendChild(anchor);
 
-  // Aplicamos el efecto de hover directo a las partes visuales independientes
   function activateSlice() {
     playTickSound();
     const rgb = hexToRgb(s.color);
@@ -533,11 +542,9 @@ socials.forEach((s, i) => {
     path.style.stroke = `rgba(${rgb},0.4)`;
     iconPath.style.fill = s.color;
     
-    // Calculamos un ligerísimo empuje angular
     const tx = Math.cos(a) * 1.5;
     const ty = Math.sin(a) * 1.5;
     
-    // Deformamos sutilmente aplicando escalado e inercias por separado a los elementos internos
     path.style.transform = `translate(${tx}px, ${ty}px) scale(1.04)`;
     iconGroup.style.transform = `translate(${tx}px, ${ty}px) scale(1.04)`;
     
@@ -550,7 +557,6 @@ socials.forEach((s, i) => {
     path.style.stroke = '#080808';
     iconPath.style.fill = isMobile ? '#666' : '#2a2a2a';
     
-    // Reseteamos limpios los transform internos
     path.style.transform = 'translate(0px, 0px) scale(1)';
     iconGroup.style.transform = 'translate(0px, 0px) scale(1)';
     
