@@ -53,7 +53,7 @@ body::before{
   gap:14px;
 }
 
-/* HEADER - ENTRADA CINEMÁTICA */
+/* HEADER */
 .top{
   display:flex;
   flex-direction:column;
@@ -105,7 +105,7 @@ body::before{
   }
 }
 
-/* PIZZA SOCIALS CORREGIDA */
+/* PIZZA SOCIALS - CORRECCIÓN SIN INVENTOS */
 .pizza-wrap{
   width:100%;
   display:flex;
@@ -117,18 +117,19 @@ body::before{
 
 .pizza-container{
   position:relative;
-  width:85vw;          /* Relativo a la pantalla en móviles */
-  max-width:320px;     /* Límite para que en PC no rompa el diseño */
-  aspect-ratio: 1 / 1; /* FUERZA un cuadrado perfecto, adiós óvalo */
+  width: 85vw;          /* Ocupa el 85% del ancho de pantalla en móviles */
+  max-width: 320px;     /* No crece más de 320px en PC */
+  aspect-ratio: 1 / 1;  /* Fuerza proporciones cuadradas nativas */
 }
 
 .pizza-svg{
-  width:100%;
-  height:100%;
+  width: 100%;
+  height: 100%;
   display: block;
+  object-fit: contain;  /* Evita que el SVG se deforme o estire internamente */
 }
 
-/* Renderizado Pixel-Art forzado para el avatar en móviles */
+/* Renderizado nítido para el pixel art */
 .pixel-avatar {
   image-rendering: -moz-crisp-edges;
   image-rendering: -o-crisp-edges;
@@ -151,14 +152,13 @@ body::before{
   transition: fill 0.15s, stroke 0.15s;
 }
 
-/* Más visibilidad a los iconos por defecto en móviles */
 .slice path.icon-path{
-  fill:#444; 
+  fill:#2a2a2a;
   transition: fill 0.15s;
   pointer-events:none;
 }
 
-/* center circle */
+/* centro */
 .center-circle{
   fill:#0d0d0d;
   stroke:#1a1a1a;
@@ -177,17 +177,17 @@ body::before{
   }
 }
 
-/* Media Query para pantallas táctiles (Mejora contraste e interacción) */
+/* Ajustes para móviles */
 @media (max-width: 768px) {
   .slice path.icon-path {
-    fill: #666; /* Íconos un poco más claros en móvil para que resalten */
+    fill: #666; /* Más contraste para pantallas de móvil */
   }
   .pizza-container {
-    width: 78vw; /* Ajuste sutil de tamaño en móviles */
+    max-width: 280px; 
   }
 }
 
-/* LINKS CON REVELADO EN CASCADA */
+/* LINKS */
 .links{
   width:100%;
   border-top:1px solid #1a1a1a;
@@ -562,8 +562,6 @@ avatarImg.setAttribute('y', cy - (innerR - 2));
 avatarImg.setAttribute('width', (innerR - 2) * 2);
 avatarImg.setAttribute('height', (innerR - 2) * 2);
 avatarImg.setAttribute('clip-path', 'url(#avatarClip)');
-avatarImg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
-// AÑADIDO: Clase CSS que fuerza el renderizado nítido de píxeles
 avatarImg.setAttribute('class', 'pixel-avatar'); 
 avatarImg.style.pointerEvents = 'none';
 avatarImg.style.opacity = '0.2';
