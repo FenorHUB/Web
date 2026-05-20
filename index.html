@@ -118,12 +118,13 @@ body::before{
   position:relative;
   width:320px;
   height:320px;
+  background:#080808;
+  border-radius:50%;
 }
 
 .pizza-svg{
   width:320px;
   height:320px;
-  background: transparent;
   display: block;
 }
 
@@ -426,6 +427,7 @@ const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 bgRect.setAttribute('width', '200');
 bgRect.setAttribute('height', '200');
 bgRect.setAttribute('fill', '#080808');
+bgRect.setAttribute('rx', '100');
 svg.appendChild(bgRect);
 
 const cx = 100, cy = 100;
